@@ -1,0 +1,328 @@
+<!-- 
+    admin_dashboard.html:
+    Admin dashboard for managing text moderation models and data.
+    - Includes:
+        - model version 
+        - data upload and download
+        - filtering and search user data
+        - model training
+-->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'images/CSA_AdminApp/css/dashboard.css' %}"> <!-- custom CSS admin dashboard-->
+</head>
+
+<body>
+    <!-- Header section -->
+    <div class="header">
+        <div class="header-left">CyberSafeAI</div>
+        <div class="header-right">
+            <a href="#">Welcome</a> |
+            <a href="{% url 'view_site' %}">View Site</a> |
+            <a href="{% url 'admin_logout' %}"
+                onclick="return confirm('The system will redirect you back to the log in page')">Log Out</a>
+        </div>
+    </div>
+
+    <!-- Main dashboard -->
+    <div class="main-container">
+
+        <!-- Left panel: download, upload, training, filtering-->
+        <div class="left-section">
+            <div class="data-box">
+                <h2>Data</h2>
+                <div class="button-container">
+                    <form id="model-version-form">
+                        {% csrf_token %}
+                        <select id="model-version" class="model-selector" onchange="changeModelVersion(this.value)">
+                            <option value="">Loading models...</option>
+                        </select>
+                    </form>
+                    <a href="{% url 'export_to_csv' %}">
+                        <button id="download-data">Download Data</button>
+                    </a>
+                    <form action="{% url 'upload_csv' %}" method="POST" enctype="multipart/form-data"
+                        style="display:inline;">
+                        {% csrf_token %}
+                        <input type="file" name="csv_file" accept=".csv" required>
+                        <button type="submit" id="upload-data">Upload Data</button>
+                    </form>
+                    <button id="train-model-btn" onclick="handleTrainModel()">Train Model</button>
+                </div>
+            </div>
+            <div class="filter-box">
+                <h3>Filters</h3>
+                <div class="filter-group">
+                    <p><strong>By toxic:</strong></p>
+                    <a href="?toxic=all&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if toxic_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic=yes&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if toxic_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic=no&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if toxic_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+                <div class="filter-group">
+                    <p><strong>By severe toxic:</strong></p>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic=all&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if severe_toxic_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic=yes&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if severe_toxic_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic=no&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if severe_toxic_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+                <div class="filter-group">
+                    <p><strong>By obscene:</strong></p>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene=all&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if obscene_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene=yes&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if obscene_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene=no&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if obscene_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+                <div class="filter-group">
+                    <p><strong>By threat:</strong></p>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat=all&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if threat_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat=yes&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if threat_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat=no&insult={{ insult_filter }}&identity_hate={{ identity_hate_filter }}"
+                       {% if threat_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+                <div class="filter-group">
+                    <p><strong>By insult:</strong></p>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult=all&identity_hate={{ identity_hate_filter }}"
+                       {% if insult_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult=yes&identity_hate={{ identity_hate_filter }}"
+                       {% if insult_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult=no&identity_hate={{ identity_hate_filter }}"
+                       {% if insult_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+                <div class="filter-group">
+                    <p><strong>By identity hate:</strong></p>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate=all"
+                       {% if identity_hate_filter == 'all' %}class="active"{% endif %}>All</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate=yes"
+                       {% if identity_hate_filter == 'yes' %}class="active"{% endif %}>Yes</a>
+                    <a href="?toxic={{ toxic_filter }}&severe_toxic={{ severe_toxic_filter }}&obscene={{ obscene_filter }}&threat={{ threat_filter }}&insult={{ insult_filter }}&identity_hate=no"
+                       {% if identity_hate_filter == 'no' %}class="active"{% endif %}>No</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User data table -->
+        <div class="center-section">
+            <h1>Select Text Analysis to Change</h1>
+            <form method="get" action="" class="search-container">
+                <input type="text" name="q" id="search-input" placeholder="Search..." value="{{ search_query }}">
+                <button type="submit" id="search-button">Search</button>
+            </form>
+            <form id="delete-form" method="post" action="{% url 'delete_texts' %}">
+                {% csrf_token %}
+                <table class="text-analysis-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all"></th>
+                            <th>Text</th>
+                            <th>Toxic</th>
+                            <th>Severe Toxic</th>
+                            <th>Obscene</th>
+                            <th>Threat</th>
+                            <th>Insult</th>
+                            <th>Identity Hate</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in data %}
+                        <tr>
+                            <td><input type="checkbox" name="delete_ids" value="{{ entry.id }}"></td>
+                            <td>{{ entry.text }}</td>
+                            <td>{% if entry.toxic %}✅{% else %}❌{% endif %}</td>
+                            <td>{% if entry.severe_toxic %}✅{% else %}❌{% endif %}</td>
+                            <td>{% if entry.obscene %}✅{% else %}❌{% endif %}</td>
+                            <td>{% if entry.threat %}✅{% else %}❌{% endif %}</td>
+                            <td>{% if entry.insult %}✅{% else %}❌{% endif %}</td>
+                            <td>{% if entry.identity_hate %}✅{% else %}❌{% endif %}</td>
+                            <td>{{ entry.created_at }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9">No data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="submit" id="delete-button">Delete Selected</button>
+            </form>
+            {% if messages %}
+            {% for message in messages %}
+            <p class="ren-message">{{message}}</p>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // selecting for deletion usage
+        document.getElementById('select-all').addEventListener('change', function () {
+            const checkboxes = document.querySelectorAll('input[name="delete_ids"]');
+            checkboxes.forEach(checkbox => checkbox.checked = this.checked);
+        });
+
+        // Dynamically checking the training and updating the "Train Model" button based on the latest check
+        function checkTrainingStatus() {
+    fetch('{% url "check_training" %}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const button = document.getElementById('train-model-btn');
+        if (data.is_training) {
+            // If in training disable the button and change the text to training...
+            button.disabled = true;
+            button.classList.add('training');
+            button.textContent = 'Training...';
+            setTimeout(checkTrainingStatus, 5000); // keep checking every 5s 
+        } else {
+            // If training is complete, update the button text and re-enable it
+            button.classList.remove('training');
+            button.textContent = 'Training Complete';
+            setTimeout(() => {
+                button.disabled = false;
+                button.textContent = 'Train Model';
+            }, 2000);
+        }
+    })
+    .catch(error => {
+        // Error handling and re-enable the button
+        const button = document.getElementById('train-model-btn');
+        button.classList.remove('training');
+        button.textContent = 'Training Failed';
+        setTimeout(() => {
+            button.disabled = false;
+            button.textContent = 'Train Model';
+        }, 2000);
+    });
+}
+
+        // Send POST request to trigger training of a model and trigger checkTrainingStatus()
+        function handleTrainModel() {
+            const button = document.getElementById('train-model-btn');
+            button.disabled = true;
+            button.classList.add('training');
+            button.textContent = 'Training...';
+
+            fetch('{% url "train-model" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.started) {
+                        // Start checking the training status
+                        setTimeout(checkTrainingStatus, 5000);
+                    } else {
+                        button.classList.remove('training');
+                        button.textContent = 'Failed to Start Training';
+                        setTimeout(() => {
+                            button.disabled = false;
+                            button.textContent = 'Train Model';
+                        }, 2000);
+                    }
+                })
+                .catch(error => { // error handling
+                    button.classList.remove('training');
+                    button.textContent = 'Training Failed';
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.textContent = 'Train Model';
+                    }, 2000);
+                });
+        }
+        
+        // Fetches available model versions and populates in the dropdown and highlight the active model
+        async function loadModelVersions() {
+    try {
+        // Get available versions
+        const versionsResponse = await fetch('{% url "get_model_versions" %}');
+        const versionsData = await versionsResponse.json();
+        
+        // Get current version
+        const currentVersionResponse = await fetch('{% url "get_current_model_version" %}');
+        const currentVersionData = await currentVersionResponse.json();
+        
+        // Get the select element
+        const select = document.getElementById('model-version');
+        
+        // Clear existing options
+        select.innerHTML = '';
+        
+        // Add new options
+        versionsData.versions.forEach(version => {
+            const option = document.createElement('option');
+            option.value = version;
+            // Convert 'trained_model_v1.0.0' to 'Model v1.0.0'
+            option.textContent = version.replace('trained_model_', 'Model ');
+            if (version === currentVersionData.version) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+    } catch (error) { // error handling
+        console.error('Error loading model versions:', error);
+        const select = document.getElementById('model-version');
+        select.innerHTML = '<option value="">Error loading models</option>';
+    }
+}
+
+// Modified version change handler (send request to update the active model)
+function changeModelVersion(version) {
+    const select = document.getElementById('model-version');
+    select.disabled = true;  // Disable during change
+
+    fetch('{% url "change_model_version" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `version=${version}` // sends the selected version
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // success message:
+            const message = document.createElement('p');
+            message.className = 'ren-message';
+            message.textContent = `Model version changed to ${version.replace('trained_model_', 'v')}`;
+            document.querySelector('.center-section').prepend(message);
+            setTimeout(() => message.remove(), 3000);
+        }
+    })
+    .finally(() => {
+        select.disabled = false;  // Re-enable after change
+    });
+}
+
+// Load versions when page loads
+document.addEventListener('DOMContentLoaded', loadModelVersions);
+
+        // Check if training is already running when page loads
+        document.addEventListener('DOMContentLoaded', checkTrainingStatus);
+    </script>
+</body>
+
+</html>

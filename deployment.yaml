@@ -1,0 +1,95 @@
+# Define the API version and kind of resource
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cybersafeai-deployment # Name of the deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cybersafeai # Match pods with this label
+  template:
+    metadata:
+      labels:
+        app: cybersafeai # Label for the pods managed by this deployment
+    spec:
+      initContainers:
+      # Step 1: Remove local SQLite databases
+      - name: remove-local-dbs
+        image: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:latest
+        command: ["sh", "-c", "rm -f /app/backend/db.sqlite3 /app/backend/admin_db.sqlite3"]
+        volumeMounts:
+          - name: user-storage
+            mountPath: /app/data/user_db # Mount user database storage
+          - name: admin-storage
+            mountPath: /app/data/admin_db  # Mount admin database storage
+      
+      # Step 2: Migrate the user database
+      - name: migrate-user
+        image: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:latest
+        command: ["sh", "-c", "python manage.py migrate --fake-initial --database=default"]
+        env:
+          - name: DJANGO_SETTINGS_MODULE # Django settings module
+            value: config.settings
+          - name: USER_DB_PATH
+            value: /app/data/user_db/db.sqlite3 # Path to user database
+          - name: ADMIN_DB_PATH
+            value: /app/data/admin_db/admin_db.sqlite3 # Path to admin database
+        volumeMounts:
+          - name: user-storage
+            mountPath: /app/data/user_db
+          - name: admin-storage
+            mountPath: /app/data/admin_db
+
+      # Step 3: Migrate the admin database
+      - name: migrate-admin
+        image: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:latest
+        command: ["sh", "-c", "python manage.py migrate CSA_AdminApp --fake-initial --database=admin_db"]
+        env:
+          - name: DJANGO_SETTINGS_MODULE
+            value: config.settings
+          - name: USER_DB_PATH
+            value: /app/data/user_db/db.sqlite3
+          - name: ADMIN_DB_PATH
+            value: /app/data/admin_db/admin_db.sqlite3
+        volumeMounts:
+          - name: user-storage
+            mountPath: /app/data/user_db
+          - name: admin-storage
+            mountPath: /app/data/admin_db
+
+      # Main application container
+      containers:
+      - name: cybersafeai
+        image: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:latest
+        imagePullPolicy: Always # Always pull the latest image
+        ports:
+          - containerPort: 8000 # Expose port 8000 for the application
+        env:
+          - name: DJANGO_SETTINGS_MODULE
+            value: config.settings
+          - name: USER_DB_PATH
+            value: /app/data/user_db/db.sqlite3
+          - name: ADMIN_DB_PATH
+            value: /app/data/admin_db/admin_db.sqlite3
+        volumeMounts:
+          - name: user-storage
+            mountPath: /app/data/user_db # Mount user database storage
+          - name: admin-storage
+            mountPath: /app/data/admin_db
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "6Gi"
+            cpu: "1"
+
+      # Persistent volumes for storing database data
+      volumes:
+        - name: user-storage
+          persistentVolumeClaim:
+            claimName: user-pvc # User database PVC
+        - name: admin-storage
+          persistentVolumeClaim:
+            claimName: admin-pvc # Admin database PVC

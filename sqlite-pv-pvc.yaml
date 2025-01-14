@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: user-pv # Name of the persistent volume
+spec:
+  capacity:
+    storage: 5Gi # Total storage capacity of the volume
+  accessModes:
+    - ReadWriteOnce # Allow read/write access by a single pod
+  persistentVolumeReclaimPolicy: Retain # Retain the data when the volume is released
+  storageClassName: manual # Storage class name for manual provisioning
+  gcePersistentDisk:
+    pdName: user-pd  # Google Cloud Persistent Disk name
+    fsType: ext4 # Filesystem type for the disk
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-pvc  # Name of the persistent volume claim
+spec:
+  accessModes:
+    - ReadWriteOnce # Match the PV access mode
+  storageClassName: manual  # Use the same storage class as the PV
+  resources:
+    requests:
+      storage: 5Gi # Request 5Gi storage (matches the PV capacity)
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: admin-pv # Name of the persistent volume
+spec:
+  capacity:
+    storage: 5Gi # Total storage capacity of the volume
+  accessModes:
+    - ReadWriteOnce # Allow read/write access by a single pod
+  persistentVolumeReclaimPolicy: Retain # Retain the data when the volume is released
+  storageClassName: manual # Storage class name for manual provisioning
+  gcePersistentDisk:
+    pdName: admin-pd  # Google Cloud Persistent Disk name
+    fsType: ext4 # Filesystem type for the disk
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: admin-pvc # Name of the persistent volume claim
+spec:
+  accessModes:
+    - ReadWriteOnce # Match the PV access mode
+  storageClassName: manual # Use the same storage class as the PV
+  resources:
+    requests:
+      storage: 5Gi # Request 5Gi storage (matches the PV capacity)

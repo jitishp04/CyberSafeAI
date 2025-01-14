@@ -1,0 +1,13 @@
+# Specify the API version and kind of resource
+apiVersion: v1
+kind: Service
+metadata:
+  name: cybersafeai-service  # Name of the service
+spec:
+  type: LoadBalancer # Service type to expose the application externally
+  selector:
+    app: cybersafeai # Matches pods with the label `app: cybersafeai`
+  ports:
+    - protocol: TCP # Protocol used for communication
+      port: 80 # External port exposed by the service
+      targetPort: 8000 # Internal port on the pods where the application listens

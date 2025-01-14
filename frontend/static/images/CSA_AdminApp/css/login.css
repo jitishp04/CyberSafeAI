@@ -1,0 +1,127 @@
+/* 
+    login.css:
+    Styles for the admin login page includes a background, login box, input fields, and a submit button.
+*/
+
+/* ==== General Styles ==== */
+body {
+    margin: 0;
+    padding: 0;
+    /* image sourced from Jetson creative  https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.jetsoncreative.com%2F24-hour-wallpaper-ios%2Fgradient-ios&psig=AOvVaw3iJOzfmW_ghCbmfy0dusyn&ust=1734362352423000&source=images&cd=vfe&opi=89978449&ved=0CBcQjhxqFwoTCIj3zeSKqooDFQAAAAAdAAAAABAE*/ 
+    background-image: url('data:image/jpeg;base64,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');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat; 
+    display: flex;
+    justify-content: center;
+    align-items: center ;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ==== Header container ==== */
+.header-container {
+    position: absolute;
+    top: 20px; 
+    left: 20px;  
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.heading-text {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    font-weight: bolder;
+}
+
+.logo {
+    max-width: 80px;
+    margin-top: 1rem;
+    display: flex;
+    left: 10px;
+}
+
+/* ==== Login box container ==== */
+.login-box {
+    width: 70%; 
+    max-width: 400px; 
+    background: white;
+    border-radius: 30px;
+    padding: 2rem;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+.login-heading {
+    font-size: clamp(1.5rem, 2vw, 2rem); 
+    font-weight: 800;
+    color: #0F0E0E;
+    text-align:left;
+}
+
+/* ==== Input fields ==== */
+.input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 80%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-top: 1rem;
+    margin-right: 4rem;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #0B73D4;
+}
+
+/* ==== Submit button ==== */
+.submit-button {
+    width: 70%;
+    padding: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    background: #0B73D4;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+    align-items: center;
+    margin-left: 3rem;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+/* ==== Error message ==== */
+.error-message {
+    font-size: 0.875rem;
+    color: red;
+    text-align: center;
+}
+
+/* ==== Responsive adjustments ==== */
+@media (max-width: 600px) {
+    .login-box {
+        padding: 1.5rem;
+        border-radius: 20px;
+    }
+
+    .submit-button {
+        font-size: 1rem;
+    }
+}

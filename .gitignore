@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+SEAI/
+.env
+.venv
+.env.*
+/dApp
+checkpoint-*
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+*/staticfiles/
+/static/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db

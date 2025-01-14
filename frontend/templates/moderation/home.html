@@ -1,0 +1,127 @@
+<!-- 
+    home.html:
+    - Handles the client-side logic for the text moderation app
+    - Tracks input character and its count
+    - Submits the form to the backend for text analysis
+    - Processes and displays results for the 6 toxicity categories, including highlighting toxic words
+    - Shows error messages and a loading indicator during processing
+-->
+
+{% extends 'moderation/base.html' %} <!-- Inherits base template-->
+
+{% load static %} <!-- Loads static (images, css)-->
+
+{% block title %}Text Moderation System{% endblock %} <!-- Sets title for the webapp-->
+
+
+{% block content %} <!-- Block content replacing the placeholder in base.html-->
+    {% include 'moderation/components/header.html' %} <!-- Header template-->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% include 'moderation/components/form.html' %} <!-- Form template-->
+
+        <!-- Highlighted Text Section -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4 flex items-center">
+                <i class="fas fa-highlighter text-indigo-600 mr-2"></i>
+                Text Analysis
+            </h2>
+            <!-- Render highlighted text -->
+            <p id="highlighted-text" class="text-gray-900 whitespace-pre-wrap"></p>
+        </div>
+
+        <!-- Results and error template-->
+        {% include 'moderation/components/results.html' %}
+        {% include 'moderation/components/error.html' %}
+    </main>
+{% endblock %}
+
+{% block scripts %} <!-- Block scripts replacing the placeholder in base.html-->
+    <script>
+        // DOM elements
+        const form = document.getElementById('analyzeForm');
+        const textArea = document.getElementById('text');
+        const charCount = document.getElementById('charCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultsDiv = document.getElementById('results');
+        const resultsContent = document.getElementById('resultsContent');
+        const errorDiv = document.getElementById('error');
+        const errorMessage = document.getElementById('errorMessage');
+        const highlightedTextDiv = document.getElementById('highlighted-text');
+
+        // Character count dynamically
+        textArea.addEventListener('input', () => {
+            charCount.textContent = textArea.value.length;
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault(); //prevent reload on submission and apply our logic
+
+            // Show loading state and clear previous error
+            loadingIndicator.classList.remove('hidden');    // show spinner
+            form.classList.add('loading');  // add loading state to form 
+            errorDiv.classList.add('hidden');   // hide any errors that were there previously when new form is submitted
+
+            try {
+                const response = await fetch('/analyze/', { // POST the form data to backend /analyze endpoint
+                    method: 'POST',
+                    body: new FormData(form),
+                });
+
+                const data = await response.json(); // parse JSON response
+
+                if (data.error) {   // error handling  
+                    errorMessage.textContent = data.error;
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+
+                // Render highlighted toxic text
+                if (data.highlighted_text) {
+                    highlightedTextDiv.innerHTML = data.highlighted_text;
+                } else {
+                    highlightedTextDiv.textContent = "No toxic words found.";
+                }
+
+                // Display results
+                resultsContent.innerHTML = ''; // Clear previous results
+                for (const [label, result] of Object.entries(data.results)) {
+                    const probability = (result.probability * 100).toFixed(1);  // convert decimal to percentage
+                    const color = result.toxic ? 'red' : 'green';   // red for toxic, green for clean text
+
+                    // dynamically append result template to the result
+                    resultsContent.innerHTML += `
+                        <div class="bg-white p-4 rounded-lg shadow border border-gray-200">
+                            <div class="flex items-center mb-2">
+                                <div class="h-3 w-3 rounded-full bg-${color}-500 mr-2"></div>
+                                <h3 class="font-semibold text-lg capitalize">${label}</h3>
+                            </div>
+                            <p class="text-${color}-600 font-medium">
+                                ${result.toxic ? 'Toxic' : 'Non-toxic'}
+                            </p>
+                            <div class="mt-2">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-sm">Probability</span>
+                                    <span class="text-sm font-medium">${probability}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-${color}-600 h-2 rounded-full" style="width: ${probability}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                resultsDiv.classList.remove('hidden'); // Ensure results stay visible
+
+            } catch (error) { // Error handling
+                errorMessage.textContent = 'An error occurred while analyzing the text.';
+                errorDiv.classList.remove('hidden');
+            } finally {
+                // Hide loading state
+                loadingIndicator.classList.add('hidden');
+                form.classList.remove('loading');
+            }
+        });
+    </script>
+{% endblock %}

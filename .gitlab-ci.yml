@@ -1,0 +1,67 @@
+# Base Docker image for the CI/CD runner
+image: google/cloud-sdk:latest
+
+# Services required for the pipeline
+services:
+  - docker:26.0.0-dind
+
+# Defining the stages of the pipeline
+stages:
+  - build
+  - test
+  - deploy
+
+# Defining variables used in the pipeline
+variables:
+  IMAGE_TAG: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:$CI_COMMIT_REF_SLUG
+  LATEST_IMAGE_TAG: europe-north1-docker.pkg.dev/cybersafeai/cyber-safe-ai/cybersafeai:latest
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+
+# Default configuration applied to all jobs
+default:
+  before_script:
+    # Authenticate with GitLab Container Registry (if needed for intermediate builds)
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+    # Write Google Cloud credentials to a temporary file
+    - echo "$CYBERSAFEAI_CREDENTIALS_JSON" > /tmp/keyfile.json
+
+    # Authenticate with Google Cloud
+    - gcloud auth activate-service-account --key-file=/tmp/keyfile.json
+    - gcloud config set project cybersafeai
+    - gcloud auth configure-docker europe-north1-docker.pkg.dev
+    
+    # Get credentials for the Kubernetes cluster
+    - gcloud container clusters get-credentials cybersafeai-cluster --region europe-north1
+
+# Build Stage
+build:
+  tags:
+    - docker-build
+  stage: build
+  script:
+    # Build and push the Docker image to Google Artifact Registry
+    - docker buildx build --platform linux/amd64 -t "$IMAGE_TAG" -t "$LATEST_IMAGE_TAG" --push .
+
+# Test Stage
+test:
+  tags:
+    - docker-build
+  stage: test
+  needs: ["build"]
+  script:
+    # Pull the just-built image (optional if cached)
+    - docker pull "$IMAGE_TAG"
+    # Run tests inside the container
+    - docker run --rm "$IMAGE_TAG" python manage.py test
+
+# Deploy stage
+deploy:
+  tags:
+    - docker-build  # Ensure this tag is associated with runners using the Docker executor
+  stage: deploy
+  needs: ["test"]  
+  script:
+    # Restart the Kubernetes deployment to use the latest image
+    - kubectl rollout restart deployment cybersafeai-deployment

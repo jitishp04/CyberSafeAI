@@ -1,0 +1,46 @@
+<!-- 
+    base.html:
+    Base template for the application,p rovides a common structure with 
+    Tailwind CSS and FontAwesome for styling and contains blocks for dynamic content
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page Title -->
+    <title>{% block title %}Text Moderation System{% endblock %}</title>
+
+    <!-- Tailwind CSS and FontAwesome for styling-->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom styling for loading and progress bar, and prevent interaction-->
+    <style>
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .animate-progress {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Main container-->
+    <div class="min-h-screen">
+        {% block content %}{% endblock %} <!--content block from its child templates -->
+    </div>
+
+    {% block scripts %} <!--content scripts from its child templates -->
+    <script>
+    </script>
+    {% endblock %}
+</body>
+
+</html>

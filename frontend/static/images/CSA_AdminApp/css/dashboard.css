@@ -1,0 +1,238 @@
+/* 
+    dashboard.css:
+    Styles for the admin dashboard page including header, sidebar (updload, download, train), user data, and filters.
+*/
+
+/* General style */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+}
+
+/* ==== Header styling ==== */
+.header {
+    background-color: #265f8e;
+    padding: 10px 20px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header a {
+    color: white;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+/* ==== Main container (user data) ==== */
+.main-container {
+    display: flex;
+    margin-top: 20px; /* Space below the header */
+    padding: 0 20px; /* Add padding to align sections with the center */
+}
+
+/* ==== Left section (sidebar) ==== */
+.left-section {
+    background-color: #2e2e2e;
+    padding: 20px;
+    box-sizing: border-box;
+    margin-top: 20px; 
+    height: fit-content; 
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px; 
+    width: 250px;
+    margin-top: 130px;
+}
+
+.left-section h2 {
+    color: #a8d0ff;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.left-section a {
+    display: block;
+    color: #c8c8c8;
+    text-decoration: none;
+    margin: 10px 0;
+}
+
+.left-section a:hover {
+    color: white;
+}
+
+/* Button container in the sidebar */
+.button-container {
+    margin-top: 20px;
+}
+
+.button-container button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #2e8b57;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.button-container button:hover {
+    background-color: #1e6541;
+}
+
+/* ==== Main container (user data) ==== */
+.center-section {
+    width: 60%;
+    padding: 0 20px; /* Align center content with the sidebars */
+}
+
+.search-container {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+#search-input {
+    padding: 8px;
+    width: 300px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #2e2e2e;
+    color: white;
+}
+
+#search-button {
+    padding: 8px 15px;
+    margin-left: 10px;
+    background-color: #2e8b57;
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.text-analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.text-analysis-table th,
+.text-analysis-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #444;
+}
+
+.text-analysis-table th {
+    background-color: #333;
+    color: #f0f0f0;
+}
+
+/* ==== Right section (Filters) ==== */
+.right-section {
+    width: 20%;
+    padding: 20px;
+    box-sizing: border-box;
+    font-size: 14px;
+    margin-top: 112px;
+}
+
+.filter-box {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.filter-box h3 {
+    color: #a8d0ff;
+    margin-bottom: 10px;
+    font-size: 16px; /* Slightly larger font for headings */
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group p {
+    margin: 0;
+    color: #f0f0f0;
+    font-size: 14px; /* Font size for labels like "By toxic:" */
+}
+
+.filter-group a {
+    display: block;
+    color: #a8d0ff;
+    text-decoration: none;
+    margin: 5px 0;
+    font-size: 12px; /* Slightly smaller font size for links */
+}
+
+.filter-group a:hover {
+    text-decoration: underline;
+}
+
+#delete-button {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#delete-button:hover {
+    background-color: #c9302c;
+}
+
+.ren-message{
+    font-family: sans-serif;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* ==== Animations ==== */
+#train-model-btn:disabled { /* Disabled state for buttons */
+    background-color: #1e6541;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@keyframes pulse { /* Animation for training step */
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+#train-model-btn.training {
+    animation: pulse 1.5s infinite;
+}
+
+.model-selector:disabled { /* Model version dropdown */
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.model-selector option {
+    background-color: #2e2e2e;
+    color: white;
+}
+
+/* Animation for loading state */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.model-selector:disabled option {
+    animation: pulse 1.5s infinite;
+}

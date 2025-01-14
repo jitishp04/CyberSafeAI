@@ -1,0 +1,46 @@
+<!-- 
+    admin_login.html:
+    Admin login page that includes a form for email and password input, with static files, error handling.
+-->
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    
+    <!-- Custom login page styles -->
+    <link rel="stylesheet" href="{% static 'images/CSA_AdminApp/css/login.css' %}">
+</head>
+<body>
+
+    <!-- Header Section with Logo and Title -->
+    <div class="header-container">
+        <img src="{% static 'images/CSA_AdminApp/images/logo.png' %}" class="logo" alt="logo image">
+        <h1 class="heading-text">Admin<br>Access</h1>
+    </div>
+
+    <!-- Login Form Container -->
+    <div class="login-box">
+        <form method="POST" action="{% url 'admin_login' %}">
+            {% csrf_token %}
+            <div class="login-heading">Sign in</div>
+            <div class="input-container">
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="submit-button">Log in</button>
+        </form>
+        {% if messages %}
+        <div class="error-message">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

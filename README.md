@@ -4,6 +4,8 @@
 
 CyberSafeAI is a web application designed to combat the rising cyber crime linked to social media use by identifying and flagging toxic text. Users can upload messages, tweets, or other text for toxicity analysis, with the system categorizing and assigning percentages to labels such as toxic, severe_toxic, obscene, threat, insult, and identity_hate. By highlighting problematic content, CyberSafeAI provides explainable AI solutions, helping individuals, content creators, and social media managers analyze and refine their text before posting, ultimately fostering a safer and healthier online environment.
 
+Further details in the [final report](./FinalReport.pdf).
+
 ### Latest Deployed Version
 [User-side application](http://34.88.100.97/)
 
@@ -70,7 +72,6 @@ docker run -p 8000:8000 --name cybersafeai_container cybersafeai:latest
 | Utkarsh Singh        | gussinut@student.gu.se         |
 
 #### Individual Contributions:
-# Individual Contributions
 
 | **Name**                    | **Description of Contribution**                                                                                                                                                                                                                                                                                                                                                                                                       |
 |-----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

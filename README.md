@@ -6,7 +6,7 @@ CyberSafeAI is a web application designed to combat the rising cyber crime linke
 
 Further details in the [final report](./FinalReport.pdf).
 
-### Latest Deployed Version
+### Latest Deployed Version (Not deployed as of 17/01/2025)
 [User-side application](http://34.88.100.97/)
 
 [Admin-side application](http://34.88.100.97/admin/login/)
